@@ -14,7 +14,96 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          bio: string | null
+          books_goal: number | null
+          created_at: string
+          display_name: string | null
+          favorite_genre: string | null
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          bio?: string | null
+          books_goal?: number | null
+          created_at?: string
+          display_name?: string | null
+          favorite_genre?: string | null
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          avatar_url?: string | null
+          bio?: string | null
+          books_goal?: number | null
+          created_at?: string
+          display_name?: string | null
+          favorite_genre?: string | null
+          id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_books: {
+        Row: {
+          author: string | null
+          cover_url: string | null
+          created_at: string
+          finished_at: string | null
+          google_books_id: string | null
+          id: string
+          pages_read: number | null
+          review: string | null
+          started_at: string | null
+          status: string
+          strawberry_rating: number | null
+          title: string
+          total_pages: number | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          author?: string | null
+          cover_url?: string | null
+          created_at?: string
+          finished_at?: string | null
+          google_books_id?: string | null
+          id?: string
+          pages_read?: number | null
+          review?: string | null
+          started_at?: string | null
+          status?: string
+          strawberry_rating?: number | null
+          title: string
+          total_pages?: number | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          author?: string | null
+          cover_url?: string | null
+          created_at?: string
+          finished_at?: string | null
+          google_books_id?: string | null
+          id?: string
+          pages_read?: number | null
+          review?: string | null
+          started_at?: string | null
+          status?: string
+          strawberry_rating?: number | null
+          title?: string
+          total_pages?: number | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
