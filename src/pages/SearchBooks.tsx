@@ -65,73 +65,77 @@ const SearchBooks = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background pb-20">
-      <header className="sticky top-0 bg-background/90 backdrop-blur-md z-40 px-4 pt-[env(safe-area-inset-top)] pb-3">
-        <h1 className="text-xl font-extrabold text-foreground pt-4">Buscar Livros 📚</h1>
+    <div className="min-h-screen bg-gradient-to-br from-[#fff0f3] to-[#ffd6dd] pb-20 font-sans">
+
+      {/* HEADER */}
+      <header className="sticky top-0 bg-white/50 backdrop-blur-md z-40 px-4 pt-[env(safe-area-inset-top)] pb-3 shadow-sm">
+        <h1 className="text-xl font-extrabold text-red-500 drop-shadow-sm pt-4">Buscar Livros 📚</h1>
         <form
           onSubmit={(e) => { e.preventDefault(); searchBooks(); }}
           className="mt-3 flex gap-2"
         >
           <div className="flex-1 relative">
-            <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
+            <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-red-300" />
             <Input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Nome do livro..."
-              className="rounded-full h-11 pl-10 bg-secondary/50 border-border focus:border-primary"
+              className="rounded-full h-11 pl-10 bg-white/70 border border-red-200 focus:border-red-400 focus:ring-1 focus:ring-pink-300 transition-shadow"
             />
           </div>
           <button
             type="submit"
-            className="h-11 w-11 rounded-full bg-primary text-primary-foreground flex items-center justify-center active:scale-95 transition-transform"
+            className="h-11 w-11 rounded-full bg-gradient-to-r from-red-400 to-pink-400 text-white flex items-center justify-center hover:scale-105 active:scale-95 transition-transform shadow-lg"
           >
             <Search size={18} />
           </button>
         </form>
       </header>
 
-      <main className="px-4 mt-2">
+      <main className="px-4 mt-4">
         {loading ? (
-          <div className="flex justify-center py-20">
-            <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+          <div className="flex flex-col gap-3 py-20 animate-pulse">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div key={i} className="bg-white/70 rounded-2xl p-3 flex gap-3 shadow-md h-28" />
+            ))}
           </div>
         ) : results.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 text-center animate-fade-up" style={{ opacity: 0 }}>
-            <BookOpen size={48} className="text-muted-foreground mb-4" />
-            <p className="text-muted-foreground font-medium">Pesquise um livro para adicionar</p>
+            <BookOpen size={48} className="text-red-300 mb-4 animate-bounce-slow" />
+            <p className="text-red-300 font-medium">Pesquise um livro para adicionar</p>
           </div>
         ) : (
           <div className="space-y-3">
             {results.map((book, i) => (
               <div
                 key={book.id}
-                className="bg-card rounded-2xl p-3 flex gap-3 shadow-[0_2px_8px_hsl(345_70%_65%/0.06)] border border-border animate-fade-up"
+                className="bg-white/70 backdrop-blur-md rounded-2xl p-3 flex gap-3 shadow-md border border-red-100 hover:scale-[1.02] hover:shadow-lg transition transform animate-fade-up"
                 style={{ opacity: 0, animationDelay: `${i * 50}ms` }}
               >
                 {book.volumeInfo.imageLinks?.thumbnail ? (
                   <img
                     src={book.volumeInfo.imageLinks.thumbnail.replace("http://", "https://")}
                     alt={book.volumeInfo.title}
-                    className="w-16 h-24 rounded-xl object-cover flex-shrink-0"
+                    className="w-16 h-24 rounded-xl object-cover flex-shrink-0 shadow"
                   />
                 ) : (
-                  <div className="w-16 h-24 rounded-xl bg-secondary flex items-center justify-center flex-shrink-0">
-                    <BookOpen size={20} className="text-muted-foreground" />
+                  <div className="w-16 h-24 rounded-xl bg-red-100 flex items-center justify-center flex-shrink-0">
+                    <BookOpen size={20} className="text-red-300" />
                   </div>
                 )}
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-bold text-foreground line-clamp-2 leading-tight">{book.volumeInfo.title}</p>
+                  <p className="text-sm font-bold text-red-500 line-clamp-2 leading-tight">{book.volumeInfo.title}</p>
                   {book.volumeInfo.authors && (
-                    <p className="text-xs text-muted-foreground mt-0.5">{book.volumeInfo.authors.join(", ")}</p>
+                    <p className="text-xs text-red-300 mt-0.5">{book.volumeInfo.authors.join(", ")}</p>
                   )}
                   {book.volumeInfo.pageCount && (
-                    <p className="text-[10px] text-muted-foreground mt-1">{book.volumeInfo.pageCount} páginas</p>
+                    <p className="text-[10px] text-red-300 mt-1">{book.volumeInfo.pageCount} páginas</p>
                   )}
                 </div>
                 <button
                   onClick={() => addBook(book)}
                   disabled={addingId === book.id}
-                  className="self-center w-10 h-10 rounded-full bg-primary text-primary-foreground flex items-center justify-center flex-shrink-0 active:scale-90 transition-transform disabled:opacity-50"
+                  className="self-center w-10 h-10 rounded-full bg-gradient-to-r from-red-400 to-pink-400 text-white flex items-center justify-center flex-shrink-0 hover:scale-110 active:scale-90 transition-transform shadow-lg disabled:opacity-50"
                 >
                   <Plus size={20} />
                 </button>
