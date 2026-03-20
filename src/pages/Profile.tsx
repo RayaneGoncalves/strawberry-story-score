@@ -9,136 +9,192 @@ import StrawberryIcon from "@/components/StrawberryIcon";
 
 const Profile = () => {
   const { user, signOut } = useAuth();
+
   const [displayName, setDisplayName] = useState("");
   const [bio, setBio] = useState("");
   const [favoriteGenre, setFavoriteGenre] = useState("");
   const [booksGoal, setBooksGoal] = useState(12);
+
   const [saving, setSaving] = useState(false);
-  const [stats, setStats] = useState({ total: 0, reading: 0, finished: 0 });
+  const [loading, setLoading] = useState(true);
+
+  const [stats, setStats] = useState({
+    total: 0,
+    reading: 0,
+    finished: 0,
+  });
 
   useEffect(() => {
     if (!user) return;
-    // Fetch profile
-    supabase
-      .from("profiles")
-      .select("*")
-      .eq("user_id", user.id)
-      .single()
-      .then(({ data }) => {
-        if (data) {
-          setDisplayName(data.display_name || "");
-          setBio(data.bio || "");
-          setFavoriteGenre(data.favorite_genre || "");
-          setBooksGoal(data.books_goal || 12);
-        }
-      });
 
-    // Fetch stats
-    supabase
-      .from("user_books")
-      .select("status")
-      .eq("user_id", user.id)
-      .then(({ data }) => {
-        if (data) {
-          setStats({
-            total: data.length,
-            reading: data.filter((b) => b.status === "reading").length,
-            finished: data.filter((b) => b.status === "finished").length,
-          });
-        }
-      });
+    const loadData = async () => {
+      setLoading(true);
+
+      const [{ data: profile }, { data: books }] = await Promise.all([
+        supabase
+          .from("profiles")
+          .select("*")
+          .eq("user_id", user.id)
+          .single(),
+
+        supabase
+          .from("user_books")
+          .select("status")
+          .eq("user_id", user.id),
+      ]);
+
+      if (profile) {
+        setDisplayName(profile.display_name || "");
+        setBio(profile.bio || "");
+        setFavoriteGenre(profile.favorite_genre || "");
+        setBooksGoal(profile.books_goal || 12);
+      }
+
+      if (books) {
+        setStats({
+          total: books.length,
+          reading: books.filter((b) => b.status === "reading").length,
+          finished: books.filter((b) => b.status === "finished").length,
+        });
+      }
+
+      setLoading(false);
+    };
+
+    loadData();
   }, [user]);
 
   const saveProfile = async () => {
     if (!user) return;
+
     setSaving(true);
+
     const { error } = await supabase
       .from("profiles")
-      .update({ display_name: displayName, bio, favorite_genre: favoriteGenre, books_goal: booksGoal })
+      .update({
+        display_name: displayName,
+        bio,
+        favorite_genre: favoriteGenre,
+        books_goal: booksGoal,
+      })
       .eq("user_id", user.id);
+
     setSaving(false);
-    if (error) toast.error("Erro ao salvar");
-    else toast.success("Perfil atualizado! 🍓");
+
+    if (error) {
+      toast.error("Erro ao salvar 😢");
+    } else {
+      toast.success("Perfil atualizado! 🍓");
+    }
   };
 
   return (
-    <div className="min-h-screen bg-background pb-20">
+    <div className="min-h-screen bg-gradient-to-br from-[#fff0f3] to-[#ffd6dd] pb-24">
+      
+      {/* HEADER */}
       <header className="px-4 pt-[env(safe-area-inset-top)] pb-3">
         <div className="flex items-center justify-between pt-4">
-          <h1 className="text-xl font-extrabold text-foreground">Meu Perfil</h1>
+          <h1 className="text-xl font-extrabold">Meu Perfil</h1>
+
           <button
             onClick={signOut}
-            className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center active:scale-95 transition-transform"
+            className="w-10 h-10 rounded-full bg-white/60 backdrop-blur flex items-center justify-center shadow active:scale-95 transition"
           >
-            <LogOut size={18} className="text-muted-foreground" />
+            <LogOut size={18} />
           </button>
         </div>
       </header>
 
-      <main className="px-4 space-y-4">
-        {/* Avatar & Name */}
-        <div className="bg-card rounded-3xl p-6 border border-border shadow-[0_2px_12px_hsl(345_70%_65%/0.08)] flex flex-col items-center animate-fade-up" style={{ opacity: 0 }}>
-          <div className="w-20 h-20 rounded-full bg-primary/15 flex items-center justify-center mb-3">
-            <StrawberryIcon filled size={40} />
+      <main className="px-4 space-y-5">
+
+        {/* AVATAR */}
+        <div className="bg-white/60 backdrop-blur rounded-3xl p-6 border shadow flex flex-col items-center transition hover:scale-[1.02]">
+          
+          <div className="w-24 h-24 rounded-full bg-gradient-to-br from-pink-400 to-red-500 flex items-center justify-center mb-3 shadow-lg">
+            <StrawberryIcon filled size={44} />
           </div>
-          <p className="text-lg font-bold text-foreground">{displayName || "Leitor(a)"}</p>
-          <p className="text-xs text-muted-foreground">{user?.email}</p>
+
+          {loading ? (
+            <div className="h-4 w-24 bg-gray-300 rounded animate-pulse" />
+          ) : (
+            <>
+              <p className="text-lg font-bold">
+                {displayName || "Leitor(a)"}
+              </p>
+              <p className="text-xs text-gray-500">{user?.email}</p>
+            </>
+          )}
         </div>
 
-        {/* Stats */}
-        <div className="grid grid-cols-3 gap-3 animate-fade-up" style={{ opacity: 0, animationDelay: "120ms" }}>
+        {/* STATS */}
+        <div className="grid grid-cols-3 gap-3">
           {[
             { label: "Total", value: stats.total },
             { label: "Lendo", value: stats.reading },
             { label: "Finalizados", value: stats.finished },
           ].map((s) => (
-            <div key={s.label} className="bg-card rounded-2xl p-3 border border-border text-center">
-              <p className="text-xl font-extrabold text-primary">{s.value}</p>
-              <p className="text-[10px] font-medium text-muted-foreground">{s.label}</p>
+            <div
+              key={s.label}
+              className="bg-white/70 backdrop-blur rounded-2xl p-4 text-center shadow hover:scale-105 transition"
+            >
+              <p className="text-2xl font-extrabold text-red-500">
+                {loading ? "—" : s.value}
+              </p>
+              <p className="text-xs text-gray-500">{s.label}</p>
             </div>
           ))}
         </div>
 
-        {/* Edit Profile */}
-        <div className="bg-card rounded-2xl p-4 border border-border space-y-3 animate-fade-up" style={{ opacity: 0, animationDelay: "240ms" }}>
-          <p className="text-sm font-semibold text-foreground">Editar perfil</p>
+        {/* FORM */}
+        <div className="bg-white/60 backdrop-blur rounded-2xl p-4 space-y-3 shadow">
+          
+          <p className="text-sm font-semibold">Editar perfil</p>
+
           <Input
             value={displayName}
             onChange={(e) => setDisplayName(e.target.value)}
-            placeholder="Seu nome"
-            className="rounded-xl h-10 bg-secondary/50"
+            placeholder="Seu nome 🍓"
+            className="rounded-xl bg-white/70"
           />
+
           <textarea
             value={bio}
             onChange={(e) => setBio(e.target.value)}
-            placeholder="Sobre você..."
+            placeholder="Fale sobre você..."
             rows={3}
             maxLength={500}
-            className="w-full rounded-xl bg-secondary/50 border border-border p-3 text-sm text-foreground placeholder:text-muted-foreground resize-none focus:outline-none focus:border-primary transition-colors"
+            className="w-full rounded-xl p-3 text-sm bg-white/70 resize-none focus:outline-none focus:ring-2 focus:ring-red-300 transition"
           />
+
           <Input
             value={favoriteGenre}
             onChange={(e) => setFavoriteGenre(e.target.value)}
             placeholder="Gênero favorito"
-            className="rounded-xl h-10 bg-secondary/50"
+            className="rounded-xl bg-white/70"
           />
+
+          {/* META */}
           <div className="flex items-center gap-3">
-            <span className="text-sm text-muted-foreground whitespace-nowrap">Meta anual:</span>
+            <span className="text-sm text-gray-500">Meta:</span>
+
             <Input
               type="number"
               value={booksGoal}
               onChange={(e) => setBooksGoal(Number(e.target.value))}
-              className="w-20 rounded-xl h-10 text-center bg-secondary/50"
+              className="w-20 text-center rounded-xl bg-white/70"
               min={1}
             />
-            <span className="text-sm text-muted-foreground">livros</span>
+
+            <span className="text-sm text-gray-500">livros/ano</span>
           </div>
+
+          {/* BOTÃO */}
           <button
             onClick={saveProfile}
             disabled={saving}
-            className="w-full h-11 rounded-full bg-primary text-primary-foreground font-bold text-sm active:scale-[0.97] transition-all disabled:opacity-50"
+            className="w-full h-11 rounded-full bg-gradient-to-r from-red-500 to-pink-400 text-white font-bold shadow-lg active:scale-95 transition disabled:opacity-50"
           >
-            {saving ? "Salvando..." : "Salvar perfil 🍓"}
+            {saving ? "Salvando..." : "Salvar 🍓"}
           </button>
         </div>
       </main>
