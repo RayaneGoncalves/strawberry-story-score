@@ -13,6 +13,9 @@ export default {
       },
     },
     extend: {
+      fontFamily: {
+        sans: ['"Nunito"', 'ui-rounded', 'system-ui', 'sans-serif'],
+      },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
@@ -46,6 +49,11 @@ export default {
         card: {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
+        },
+        strawberry: {
+          DEFAULT: "hsl(var(--strawberry))",
+          light: "hsl(var(--strawberry-light))",
+          leaf: "hsl(var(--strawberry-leaf))",
         },
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",
