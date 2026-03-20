@@ -6,6 +6,7 @@ import { LogOut } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import BottomNav from "@/components/BottomNav";
 import StrawberryIcon from "@/components/StrawberryIcon";
+import Confetti from "react-confetti"; // npm install react-confetti
 
 const Profile = () => {
   const { user, signOut } = useAuth();
@@ -17,6 +18,7 @@ const Profile = () => {
 
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [showConfetti, setShowConfetti] = useState(false);
 
   const [stats, setStats] = useState({
     total: 0,
@@ -51,18 +53,20 @@ const Profile = () => {
       }
 
       if (books) {
+        const total = books.length;
         setStats({
-          total: books.length,
+          total,
           reading: books.filter((b) => b.status === "reading").length,
           finished: books.filter((b) => b.status === "finished").length,
         });
+        if (total >= booksGoal) setShowConfetti(true);
       }
 
       setLoading(false);
     };
 
     loadData();
-  }, [user]);
+  }, [user, booksGoal]);
 
   const saveProfile = async () => {
     if (!user) return;
@@ -91,8 +95,10 @@ const Profile = () => {
   const progress = stats.total && booksGoal ? Math.min((stats.total / booksGoal) * 100, 100) : 0;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#fff0f3] to-[#ffd6dd] pb-28 font-sans">
-      
+    <div className="min-h-screen bg-gradient-to-br from-[#fff0f3] to-[#ffd6dd] pb-28 font-sans relative overflow-hidden">
+
+      {showConfetti && <Confetti recycle={false} numberOfPieces={200} />}
+
       {/* HEADER */}
       <header className="px-4 pt-[env(safe-area-inset-top)] pb-3">
         <div className="flex items-center justify-between pt-4">
@@ -112,7 +118,7 @@ const Profile = () => {
         {/* AVATAR */}
         <div className="bg-white/60 backdrop-blur-md rounded-3xl p-6 border border-pink-200 shadow-md flex flex-col items-center transition hover:scale-105 animate-fade-in">
           
-          <div className="w-28 h-28 rounded-full bg-gradient-to-br from-pink-400 to-red-400 flex items-center justify-center mb-3 shadow-lg animate-bounce-slow">
+          <div className="w-28 h-28 rounded-full bg-gradient-to-br from-pink-400 to-red-400 flex items-center justify-center mb-3 shadow-lg animate-bounce-slow hover:animate-bounce-fast transition">
             <StrawberryIcon filled size={48} />
           </div>
 
@@ -136,7 +142,7 @@ const Profile = () => {
             { label: "Lendo", value: stats.reading },
             { label: "Finalizados", value: stats.finished },
           ].map((s) => (
-            <div key={s.label} className="bg-white/70 backdrop-blur-md rounded-2xl p-4 text-center shadow-md hover:scale-105 transition animate-fade-in">
+            <div key={s.label} className="bg-white/70 backdrop-blur-md rounded-2xl p-4 text-center shadow-md hover:scale-105 hover:rotate-[1deg] transition animate-fade-in">
               <p className="text-2xl font-extrabold text-red-500">{loading ? "—" : s.value}</p>
               <p className="text-xs text-red-300">{s.label}</p>
             </div>
@@ -144,7 +150,7 @@ const Profile = () => {
         </div>
 
         {/* PROGRESSO */}
-        <div className="bg-white/60 backdrop-blur-md rounded-2xl p-4 shadow-md">
+        <div className="bg-white/60 backdrop-blur-md rounded-2xl p-4 shadow-md animate-fade-in">
           <p className="text-sm text-red-400 font-semibold mb-1">Progresso da meta anual: {stats.total}/{booksGoal}</p>
           <div className="w-full h-3 bg-red-100 rounded-full overflow-hidden">
             <div className="h-3 bg-gradient-to-r from-red-400 to-pink-400 rounded-full transition-all" style={{ width: `${progress}%` }} />
@@ -159,7 +165,7 @@ const Profile = () => {
             value={displayName}
             onChange={(e) => setDisplayName(e.target.value)}
             placeholder="Seu nome 🍓"
-            className="rounded-xl bg-white/70 shadow-sm focus:ring-2 focus:ring-pink-300 transition"
+            className="rounded-xl bg-white/70 shadow-sm focus:ring-2 focus:ring-pink-300 transition hover:scale-[1.02]"
           />
 
           <textarea
@@ -168,14 +174,14 @@ const Profile = () => {
             placeholder="Fale sobre você..."
             rows={3}
             maxLength={500}
-            className="w-full rounded-xl p-3 text-sm bg-white/70 resize-none focus:outline-none focus:ring-2 focus:ring-pink-300 transition shadow-sm"
+            className="w-full rounded-xl p-3 text-sm bg-white/70 resize-none focus:outline-none focus:ring-2 focus:ring-pink-300 transition shadow-sm hover:scale-[1.01]"
           />
 
           <Input
             value={favoriteGenre}
             onChange={(e) => setFavoriteGenre(e.target.value)}
             placeholder="Gênero favorito"
-            className="rounded-xl bg-white/70 shadow-sm focus:ring-2 focus:ring-pink-300 transition"
+            className="rounded-xl bg-white/70 shadow-sm focus:ring-2 focus:ring-pink-300 transition hover:scale-[1.02]"
           />
 
           {/* META */}
@@ -185,7 +191,7 @@ const Profile = () => {
               type="number"
               value={booksGoal}
               onChange={(e) => setBooksGoal(Number(e.target.value))}
-              className="w-20 text-center rounded-xl bg-white/70 shadow-sm focus:ring-2 focus:ring-pink-300 transition"
+              className="w-20 text-center rounded-xl bg-white/70 shadow-sm focus:ring-2 focus:ring-pink-300 transition hover:scale-[1.02]"
               min={1}
             />
             <span className="text-sm text-red-300 font-medium">livros/ano</span>
